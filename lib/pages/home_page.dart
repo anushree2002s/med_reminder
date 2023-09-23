@@ -185,7 +185,7 @@ class MedicineCard extends StatelessWidget {
   Hero makeIcon(double size) {
     //here is the bug, the capital word of the first letter
     //lets fix
-    if (medicine.medicineType == 'Syrup') {
+    if (medicine.medicineType == 'syrup') {
       return Hero(
         tag: medicine.medicineName! + medicine.medicineType!,
         child: SvgPicture.asset(
@@ -194,7 +194,7 @@ class MedicineCard extends StatelessWidget {
           height: 7.h,
         ),
       );
-    } else if (medicine.medicineType == 'Capsule') {
+    } else if (medicine.medicineType == 'capsule') {
       return Hero(
         tag: medicine.medicineName! + medicine.medicineType!,
         child: SvgPicture.asset(
@@ -203,7 +203,7 @@ class MedicineCard extends StatelessWidget {
           height: 7.h,
         ),
       );
-    } else if (medicine.medicineType == 'Tablet') {
+    } else if (medicine.medicineType == 'tablet') {
       return Hero(
         tag: medicine.medicineName! + medicine.medicineType!,
         child: SvgPicture.asset(

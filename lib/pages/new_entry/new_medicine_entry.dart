@@ -12,6 +12,8 @@ import '../../common/convert_time.dart';
 import '../../models/medicine.dart';
 import '../../models/medicine_type.dart';
 import '../success_screen/success_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class NewMedicationEntryPage extends StatefulWidget {
   const NewMedicationEntryPage({super.key});
@@ -26,6 +28,7 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
   late NewEntryBlock _newEntryBlock;
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   late GlobalKey<ScaffoldState> _scaffoldKey;
+
   @override
   void dispose() {
     super.dispose();
@@ -44,6 +47,32 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
     _scaffoldKey = GlobalKey<ScaffoldState>();
     initializeNotifications();
     initializeErrorListen();
+  }
+
+  String getMedicineTypeName(String medicineType) {
+    switch (medicineType) {
+      case MedicineType.syrup:
+        return 'Syrup';
+      case MedicineType.capsule:
+        return 'Capsule';
+      case MedicineType.tablet:
+        return 'Tablet';
+      default:
+        return ''; // Handle any other cases if needed
+    }
+  }
+
+  String getMedicineTypeIcon(String medicineType) {
+    switch (medicineType) {
+      case MedicineType.syrup:
+        return 'assets/icons/syrup2.svg';
+      case MedicineType.capsule:
+        return 'assets/icons/capsule.svg';
+      case MedicineType.tablet:
+        return 'assets/icons/tablet2.svg';
+      default:
+        return ''; // Handle any other cases if needed
+    }
   }
 
   @override
@@ -98,7 +127,7 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
               const PanelTitle(title: "Medicine Type", isRequired: false),
               Padding(
                 padding: EdgeInsets.only(top: 1.h),
-                child: StreamBuilder<MedicineType>(
+                child: StreamBuilder<String>(
                   //new entry block
                   stream: _newEntryBlock.selectedMedicineType,
 
@@ -107,28 +136,22 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         MedicineTypeColumn(
-                          medicineType: MedicineType.Syrup,
-                          name: 'Syrup',
-                          iconValue: 'assets/icons/syrup2.svg',
-                          isSelected: snapshot.data == MedicineType.Syrup
-                              ? true
-                              : false,
+                          medicineType: MedicineType.syrup,
+                          name: getMedicineTypeName(MedicineType.syrup),
+                          iconValue: getMedicineTypeIcon(MedicineType.syrup),
+                          isSelected: snapshot.data == MedicineType.syrup,
                         ),
                         MedicineTypeColumn(
-                          medicineType: MedicineType.Capsule,
-                          name: 'Capsule',
-                          iconValue: 'assets/icons/capsule.svg',
-                          isSelected: snapshot.data == MedicineType.Capsule
-                              ? true
-                              : false,
+                          medicineType: MedicineType.capsule,
+                          name: getMedicineTypeName(MedicineType.capsule),
+                          iconValue: getMedicineTypeIcon(MedicineType.capsule),
+                          isSelected: snapshot.data == MedicineType.capsule,
                         ),
                         MedicineTypeColumn(
-                          medicineType: MedicineType.Tablet,
-                          name: 'Tablet',
-                          iconValue: 'assets/icons/tablet2.svg',
-                          isSelected: snapshot.data == MedicineType.Tablet
-                              ? true
-                              : false,
+                          medicineType: MedicineType.tablet,
+                          name: getMedicineTypeName(MedicineType.tablet),
+                          iconValue: getMedicineTypeIcon(MedicineType.tablet),
+                          isSelected: snapshot.data == MedicineType.tablet,
                         ),
                       ],
                     );
@@ -162,12 +185,18 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
                                 color: Color.fromARGB(255, 243, 244, 248)),
                       ),
                     ),
-                    onPressed: () {
+                    onPressed: () async {
                       //add medicine
                       //some validation
                       //go to success screen
                       String? medicineName;
                       int? dosage;
+                      int? intervalN;
+                      String? medicationType;
+                      String? startTimeT;
+
+                      print("medicine type :$medicationType");
+
                       //medicine name
                       if (nameController.text == "") {
                         _newEntryBlock.submitError(EntryError.nameNull);
@@ -183,6 +212,29 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
                       if (dosageController.text != " ") {
                         dosage = int.parse(dosageController.text);
                       }
+
+                      if (_newEntryBlock.selectedMedicineType!.value != null) {
+                        medicationType =
+                            _newEntryBlock.selectedMedicineType!.value;
+                      } else {
+                        // Handle the case where no medicine type is selected.
+                        // You can set a default value or display an error message.
+                        return;
+                      }
+
+                      if (_newEntryBlock.selectIntervals!.value != null) {
+                        intervalN = _newEntryBlock.selectIntervals!.value;
+                      }
+
+                      // // Calculate startTimeT based on the selected time
+                      if (_newEntryBlock.selectedTimeOfDay$!.value != 'None') {
+                        startTimeT = _newEntryBlock.selectedTimeOfDay$!.value;
+                        // } else {
+                        //   // Handle the case where no start time is selected.
+                        //   // You can set a default value or display an error message.
+                        //   return;
+                      }
+
                       for (var medicine in globalBlock.medicineList$!.value) {
                         if (medicineName == medicine.medicineName) {
                           _newEntryBlock.submitError(EntryError.nameDuplicate);
@@ -197,11 +249,18 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
                         _newEntryBlock.submitError(EntryError.startTime);
                         return;
                       }
+                      CollectionReference _medication =
+                          FirebaseFirestore.instance.collection('medication');
 
-                      String medicineType = _newEntryBlock
-                          .selectedMedicineType!.value
-                          .toString()
-                          .substring(13);
+                      await _medication.add({
+                        'name': medicineName,
+                        'dosage': dosage,
+                        'interval': intervalN,
+                        'medicationType': medicationType,
+                        'startTime': startTimeT
+                      });
+                      String medicineType =
+                          _newEntryBlock.selectedMedicineType!.value;
 
                       int interval = _newEntryBlock.selectIntervals!.value;
                       String startTime =
@@ -219,6 +278,8 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
                           medicineType: medicineType,
                           interval: interval,
                           startTime: startTime);
+                      nameController.clear();
+                      dosageController.clear();
                       //update medicine list via global block
                       globalBlock.updateMedicineList(newEntryMedicine);
                       //schedule notification
@@ -281,8 +342,6 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
     return ids;
   }
 
-  final FlutterLocalNotificationsPlugin notificationsPlugin =
-      FlutterLocalNotificationsPlugin();
   initializeNotifications() async {
     var initializationSettingsAndroid =
         const AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -330,7 +389,7 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
       await flutterLocalNotificationsPlugin.showDailyAtTime(
           int.parse(medicine.notificationIDs![i]),
           'Reminder: ${medicine.medicineName}',
-          medicine.medicineType.toString() != MedicineType.None.toString()
+          medicine.medicineType.toString() != MedicineType.none.toString()
               ? 'It is time to take your ${medicine.medicineType!.toUpperCase()}, according to the schedule'
               : 'Please take your medicine',
           Time(hour, minute, 0),
@@ -350,6 +409,7 @@ class SelectTime extends StatefulWidget {
 class _SelectTimeState extends State<SelectTime> {
   TimeOfDay _time = const TimeOfDay(hour: 0, minute: 00);
   bool _clicked = false;
+
   Future<TimeOfDay?> _selectTime() async {
     final NewEntryBlock newEntryBlock =
         Provider.of<NewEntryBlock>(context, listen: false);
@@ -408,6 +468,7 @@ class IntervalSelection extends StatefulWidget {
 class _IntervalSelectionState extends State<IntervalSelection> {
   final _intervals = [6, 8, 12, 24];
   var _selected = 0;
+
   @override
   Widget build(BuildContext context) {
     final NewEntryBlock newEntryBlock = Provider.of<NewEntryBlock>(context);
@@ -475,7 +536,8 @@ class MedicineTypeColumn extends StatelessWidget {
       required this.name,
       required this.iconValue,
       required this.isSelected});
-  final MedicineType medicineType;
+
+  final String medicineType;
   final String name;
   final String iconValue;
   final bool isSelected;
@@ -546,6 +608,7 @@ class MedicineTypeColumn extends StatelessWidget {
 
 class PanelTitle extends StatelessWidget {
   const PanelTitle({super.key, required this.title, required this.isRequired});
+
   final String title;
   final bool isRequired;
 

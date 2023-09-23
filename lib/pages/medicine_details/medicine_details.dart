@@ -8,6 +8,7 @@ import 'package:sizer/sizer.dart';
 
 class MedicineDetails extends StatefulWidget {
   const MedicineDetails({super.key, required this.medicine});
+
   final Medicine medicine;
 
   @override
@@ -59,6 +60,7 @@ class _MedicineDetailsState extends State<MedicineDetails> {
       ),
     );
   }
+
   // delete a medicine from memory
 
   openAlertBox(BuildContext context, GlobalBlock _globalBlock) {
@@ -114,8 +116,9 @@ class _MedicineDetailsState extends State<MedicineDetails> {
 class MainSection extends StatelessWidget {
   const MainSection({Key? key, this.medicine}) : super(key: key);
   final Medicine? medicine;
+
   Hero makeIcon(double size) {
-    if (medicine!.medicineType == 'Syrup') {
+    if (medicine!.medicineType == 'syrup') {
       return Hero(
         tag: medicine!.medicineName! + medicine!.medicineType!,
         child: SvgPicture.asset(
@@ -124,7 +127,7 @@ class MainSection extends StatelessWidget {
           height: 7.h,
         ),
       );
-    } else if (medicine!.medicineType == 'Capsule') {
+    } else if (medicine!.medicineType == 'capsule') {
       return Hero(
         tag: medicine!.medicineName! + medicine!.medicineType!,
         child: SvgPicture.asset(
@@ -133,7 +136,7 @@ class MainSection extends StatelessWidget {
           height: 7.h,
         ),
       );
-    } else if (medicine!.medicineType == 'Tablet') {
+    } else if (medicine!.medicineType == 'tablet') {
       return Hero(
         tag: medicine!.medicineName! + medicine!.medicineType!,
         child: SvgPicture.asset(
@@ -194,6 +197,7 @@ class MainInfoTab extends StatelessWidget {
       : super(key: key);
   final String fieldTitle;
   final String fieldInfo;
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -224,6 +228,7 @@ class MainInfoTab extends StatelessWidget {
 class ExtendedSection extends StatelessWidget {
   const ExtendedSection({Key? key, this.medicine}) : super(key: key);
   final Medicine? medicine;
+
   @override
   Widget build(BuildContext context) {
     return ListView(

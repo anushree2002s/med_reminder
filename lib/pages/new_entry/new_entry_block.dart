@@ -3,29 +3,33 @@ import '../../models/medicine_type.dart';
 import '../../models/errors.dart';
 
 class NewEntryBlock {
-  BehaviorSubject<MedicineType>? _selectedMedicineType$;
-  ValueStream<MedicineType>? get selectedMedicineType =>
+  BehaviorSubject<String>? _selectedMedicineType$;
+
+  ValueStream<String>? get selectedMedicineType =>
       _selectedMedicineType$!.stream;
 
 //this is abt the intervals of time. 6,8,12,24
   BehaviorSubject<int>? _selectedInterval$;
+
   BehaviorSubject<int>? get selectIntervals => _selectedInterval$;
 
 //this is abt Timeofday the hours and minutes
   BehaviorSubject<String>? _selectedTimeOfDay$;
+
   BehaviorSubject<String>? get selectedTimeOfDay$ => _selectedTimeOfDay$;
 
 //error states
   BehaviorSubject<EntryError>? _errorState$;
+
   BehaviorSubject<EntryError>? get errorState$ => _errorState$;
 
   NewEntryBlock() {
-    _selectedMedicineType$ =
-        BehaviorSubject<MedicineType>.seeded(MedicineType.None);
+    _selectedMedicineType$ = BehaviorSubject<String>.seeded(MedicineType.none);
     _selectedTimeOfDay$ = BehaviorSubject<String>.seeded('none');
     _selectedInterval$ = BehaviorSubject<int>.seeded(0);
     _errorState$ = BehaviorSubject<EntryError>();
   }
+
   void dispose() {
     _selectedMedicineType$!.close();
     _selectedTimeOfDay$!.close();
@@ -44,15 +48,14 @@ class NewEntryBlock {
     _selectedTimeOfDay$!.add(time);
   }
 
-  void updateSelectedMedicine(MedicineType type) {
-    MedicineType _tempType = _selectedMedicineType$!.value;
+  void updateSelectedMedicine(String type) {
+    String _tempType = _selectedMedicineType$!.value;
     if (type == _tempType) {
-      _selectedMedicineType$!.add(MedicineType.None);
+      _selectedMedicineType$!.add(MedicineType.none);
     } else {
       _selectedMedicineType$!.add(type);
     }
   }
 }
-
 
 //The code block you've provided is implementing a class named NewEntryBlock that appears to be managing the state and behavior related to a new entry form, likely for adding a new medicine in your medication reminder app. L
