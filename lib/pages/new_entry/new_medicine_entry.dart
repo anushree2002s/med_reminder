@@ -14,6 +14,8 @@ import '../../models/medicine_type.dart';
 import '../success_screen/success_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class NewMedicationEntryPage extends StatefulWidget {
   const NewMedicationEntryPage({super.key});
@@ -342,44 +344,56 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
     return ids;
   }
 
-  initializeNotifications() async {
+  void initializeNotifications() async {
     var initializationSettingsAndroid =
         const AndroidInitializationSettings('@mipmap/ic_launcher');
+    var initializationSettingsIOS = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+        onDidReceiveLocalNotification:
+            (int id, String? title, String? body, String? payload) async {
+          await onSelectNotification(payload);
+        });
 
-    var initializationSettingsIOS = const DarwinInitializationSettings();
-    var initializationSettings = InitializationSettings(
-        android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
+    final InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
 
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      // onSelectNotification: onSelectNotification,
+  );
   }
-
-  Future onSelectNotification(String? payload) async {
-    if (payload != null) {
-      debugPrint('notification paylod: $payload');
-    }
-    await Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const HomePage()));
+Future<void> onSelectNotification(String? payload) async {
+  if (payload != null) {
+    debugPrint('notification payload: $payload');
   }
+  await Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const HomePage()),
+  );
+}
 
   Future<void> scheduleNotification(Medicine medicine) async {
     var hour = int.parse(medicine.startTime![0] + medicine.startTime![1]);
     var ogValue = hour;
     var minute = int.parse(medicine.startTime![2] + medicine.startTime![3]);
     var androidPlatformChannelSpecifics = const AndroidNotificationDetails(
-        'repeatDailyAtTime channel id', 'repeatDailyAtTime channel name',
-        importance: Importance.max,
-        ledColor: Color(0xFF59C1BD),
-        ledOffMs: 1000,
-        ledOnMs: 1000,
-        enableLights: true);
+      'repeatDailyAtTime channel id',
+      'repeatDailyAtTime channel name',
+      importance: Importance.max,
+    );
 
     var iOSPlatformChannelSpecifics = const DarwinNotificationDetails();
 
     var platformChannelSpecifics = NotificationDetails(
-        android: androidPlatformChannelSpecifics,
-        iOS: iOSPlatformChannelSpecifics);
+      android: androidPlatformChannelSpecifics,
+      iOS: iOSPlatformChannelSpecifics,
+    );
 
-    // also add the ledlight settings on it. HERUMLA PACHI ABA
     for (int i = 0; i < (24 / medicine.interval!).floor(); i++) {
       if (hour + (medicine.interval! * i) > 23) {
         hour = hour + (medicine.interval! * i) - 24;
@@ -387,13 +401,14 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
         hour = hour + (medicine.interval! * i);
       }
       await flutterLocalNotificationsPlugin.showDailyAtTime(
-          int.parse(medicine.notificationIDs![i]),
-          'Reminder: ${medicine.medicineName}',
-          medicine.medicineType.toString() != MedicineType.none.toString()
-              ? 'It is time to take your ${medicine.medicineType!.toUpperCase()}, according to the schedule'
-              : 'Please take your medicine',
-          Time(hour, minute, 0),
-          platformChannelSpecifics);
+        int.parse(medicine.notificationIDs![i]),
+        'Reminder: ${medicine.medicineName}',
+        medicine.medicineType.toString() != MedicineType.none.toString()
+            ? 'It is time to take your ${medicine.medicineType!.toUpperCase()}, according to the schedule'
+            : 'Please take your medicine',
+        Time(hour, minute, 0),
+        platformChannelSpecifics,
+      );
       hour = ogValue;
     }
   }

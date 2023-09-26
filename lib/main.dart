@@ -8,12 +8,16 @@ import 'package:medicine_reminder_app/pages/front_page/sign_in_page.dart';
 import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:medicine_reminder_app/pages/new_entry/new_medicine_entry.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  
+  tz.initializeTimeZones();
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
