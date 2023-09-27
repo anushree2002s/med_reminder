@@ -74,7 +74,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       .then((value) {
                     const snackBar = SnackBar(
                       content: Text('You are now registered. Sign in NOW.'),
-                      duration: Duration(milliseconds: 5000),
+                      duration: Duration(milliseconds: 3000),
                       backgroundColor: Color.fromARGB(255, 89, 193, 189),
                     );
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -86,7 +86,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     const snackBar = SnackBar(
                         content:
                             Text('Please enter all the details CAREFULLY.'),
-                        duration: Duration(milliseconds: 5000),
+                        duration: Duration(milliseconds: 3000),
                         backgroundColor: Color.fromARGB(255, 89, 193, 189));
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   });

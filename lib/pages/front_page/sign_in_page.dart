@@ -62,7 +62,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       .then((value) {
                     const snackBar = SnackBar(
                         content: Text('You are logged in'),
-                        duration: Duration(milliseconds: 5000),
+                        duration: Duration(milliseconds: 3000),
                         backgroundColor: Color.fromARGB(255, 89, 193, 189));
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                     Navigator.push(context,
@@ -70,7 +70,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   }).onError((error, stackTrace) {
                     const snackBar = SnackBar(
                         content: Text('INVALID CREDENTIALS. Try again.'),
-                        duration: Duration(milliseconds: 5000),
+                        duration: Duration(milliseconds: 3000),
                         backgroundColor: Color.fromARGB(255, 89, 193, 189));
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   });

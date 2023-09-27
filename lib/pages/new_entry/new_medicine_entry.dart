@@ -365,17 +365,18 @@ class _NewMedicationEntryPageState extends State<NewMedicationEntryPage> {
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       // onSelectNotification: onSelectNotification,
-  );
+    );
   }
-Future<void> onSelectNotification(String? payload) async {
-  if (payload != null) {
-    debugPrint('notification payload: $payload');
+
+  Future<void> onSelectNotification(String? payload) async {
+    if (payload != null) {
+      debugPrint('notification payload: $payload');
+    }
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HomePage()),
+    );
   }
-  await Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const HomePage()),
-  );
-}
 
   Future<void> scheduleNotification(Medicine medicine) async {
     var hour = int.parse(medicine.startTime![0] + medicine.startTime![1]);
